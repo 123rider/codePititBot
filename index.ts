@@ -47,6 +47,7 @@ if (view.url != "https://code.ptit.edu.vn/student/question") {
 }
 
 const tasks = await getTask();
+console.log(tasks);
 for (const task of tasks) {
   if (!task.completed) {
     console.log(`Processing: [${task.id}] - ${task.title}`);
@@ -86,15 +87,13 @@ for (const task of tasks) {
 }
 
 async function getTask() {
-  const cached = Bun.file("./output/question.json");
-  if (await cached.exists()) {
-    const tasks = await cached.json();
-    return tasks as Array<Problem>;
-  }
   const sum_task: Array<Problem> = [];
 
   for (let i = 0; i <= 2; i++) {
     console.log(`reading page ${i + 1}`);
+    await view.navigate(
+      `https://code.ptit.edu.vn/student/question?page=${i + 1}`,
+    );
     const payload = `(() => {
   // Select all table rows in the document
   const rows = Array.from(document.querySelectorAll('table tr'))
@@ -126,11 +125,7 @@ async function getTask() {
     tasks.map((v) => {
       sum_task.push(v);
     });
-    if (i != 2) {
-      await view.click('a[rel="next"]');
-    }
   }
-  Bun.write("./output/questions.json", JSON.stringify(sum_task));
   return sum_task as Array<Problem>;
 }
 
